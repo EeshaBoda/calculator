@@ -1,17 +1,35 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route("/add", methods=["POST"])
-def add():
-    data = request.json
+@app.route("/")
+def home():
+    return "Calculator Backend is Running"
 
-    num1 = int(data["num1"])
-    num2 = int(data["num2"])
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = request.get_json()
 
-    return jsonify({
-        "answer": num1 + num2
-    })
+    num1 = float(data["num1"])
+    num2 = float(data["num2"])
+    operation = data["operation"]
+
+    if operation == "add":
+        result = num1 + num2
+    elif operation == "subtract":
+        result = num1 - num2
+    elif operation == "multiply":
+        result = num1 * num2
+    elif operation == "divide":
+        if num2 == 0:
+            return jsonify({"answer": "Cannot divide by zero"})
+        result = num1 / num2
+    else:
+        return jsonify({"answer": "Invalid operation"})
+
+    return jsonify({"answer": result})
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
